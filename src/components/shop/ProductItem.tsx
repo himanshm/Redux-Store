@@ -1,13 +1,21 @@
 import Card from '../ui/Card';
 import classes from './ProductItem.module.css';
 
+import { useAppDispatch } from '../../store/hooks';
+import { addToCart } from '../../store/cart-slice';
+
 type ProductItemProps = {
+  id: string;
   title: string;
   price: number;
   description: string;
 };
 
-const ProductItem = ({ title, price, description }: ProductItemProps) => {
+const ProductItem = ({ id, title, price, description }: ProductItemProps) => {
+  const dispatch = useAppDispatch();
+  const addToCartHandler = () => {
+    dispatch(addToCart({ id, title, price }));
+  };
   return (
     <li className={classes.item}>
       <Card className=''>
@@ -17,7 +25,7 @@ const ProductItem = ({ title, price, description }: ProductItemProps) => {
         </header>
         <p>{description}</p>
         <div className={classes.actions}>
-          <button>Add to Cart</button>
+          <button onClick={addToCartHandler}>Add to Cart</button>
         </div>
       </Card>
     </li>
