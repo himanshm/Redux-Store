@@ -6,7 +6,7 @@ import Product from './components/shop/Product';
 import { useAppSelector, useAppDispatch } from './store/hooks';
 // import { uiActions } from './store/ui-slice';
 import Notification from './components/ui/Notification';
-import { sendCartData } from './store/cart-slice';
+import { fetchCartData, sendCartData } from './store/cart-actions';
 
 let isInitial = true;
 
@@ -15,6 +15,10 @@ function App() {
   const showCart = useAppSelector((state) => state.ui.cartIsVisible);
   const cart = useAppSelector((state) => state.cart);
   const notification = useAppSelector((state) => state.ui.notification);
+
+  useEffect(() => {
+    dispatch(fetchCartData());
+  }, [dispatch]);
 
   useEffect(() => {
     // const sendCartData = async () => {
@@ -61,7 +65,10 @@ function App() {
       return;
     }
     // sendCartData();
-    dispatch(sendCartData(cart));
+
+    if (cart.changed) {
+      dispatch(sendCartData(cart));
+    }
   }, [cart, dispatch]);
 
   return (

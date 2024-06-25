@@ -1,6 +1,4 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { uiActions } from './ui-slice';
-import { AppDispatch } from '.';
 
 type CartItem = {
   id: string;
@@ -10,14 +8,16 @@ type CartItem = {
   quantity: number;
 };
 
-type CartState = {
+export type CartState = {
   items: CartItem[];
   totalQuantity: number;
+  changed: boolean;
 };
 
 const initialState: CartState = {
   items: [],
   totalQuantity: 0,
+  changed: false,
 };
 
 type ActionPayload = {
@@ -39,6 +39,7 @@ const cartSlice = createSlice({
       const existingItem = state.items.find((item) => item.id === newItem.id);
 
       state.totalQuantity++;
+      state.changed = true;
       if (!existingItem) {
         state.items.push({
           id: newItem.id,
@@ -58,6 +59,7 @@ const cartSlice = createSlice({
       const existingItem = state.items[itemIndex];
 
       state.totalQuantity--;
+      state.changed = true;
 
       if (existingItem.quantity === 1) {
         state.items = state.items.filter((item) => item.id !== itemId);
@@ -68,52 +70,6 @@ const cartSlice = createSlice({
     },
   },
 });
-
-// Action Creator Thunk
-export const sendCartData = (cart: CartState) => {
-  return async (dispatch: AppDispatch) => {
-    dispatch(
-      uiActions.showNotification({
-        status: 'pending',
-        title: 'Sending',
-        message: 'Sending cart data',
-      })
-    );
-
-    const sendRequest = async () => {
-      const res = await fetch(
-        'https://redux-store-f043e-default-rtdb.firebaseio.com/cart.json',
-        {
-          method: 'PUT',
-          body: JSON.stringify(cart),
-        }
-      );
-
-      if (!res.ok) {
-        throw new Error('Sending cart data failed!');
-      }
-    };
-
-    try {
-      await sendRequest();
-      dispatch(
-        uiActions.showNotification({
-          status: 'success',
-          title: 'Success',
-          message: 'Sent cart data successfully.',
-        })
-      );
-    } catch (error) {
-      dispatch(
-        uiActions.showNotification({
-          status: 'error',
-          title: 'Error',
-          message: 'Sending cart data failed!',
-        })
-      );
-    }
-  };
-};
 
 export const { replaceCart, addToCart, removeFromCart } = cartSlice.actions;
 
